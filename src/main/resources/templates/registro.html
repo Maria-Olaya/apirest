@@ -26,36 +26,61 @@
         <div class="card p-4 shadow-sm rounded-3">
           <h2 class="mb-4 text-center">Registro</h2>
 
-          <form method="post" th:action="@{/registro}" th:object="${registerForm}" class="needs-validation">
+
+          <div th:if="${mensajeExito}" class="alert alert-success" th:text="${mensajeExito}"></div>
+
+          <form method="post" th:action="@{/registro}" th:object="${registerForm}" class="needs-validation" novalidate>
 
 
             <!-- Nombre -->
             <div class="mb-3">
               <label class="form-label">Nombre</label>
-              <input type="text" th:field="*{nombre}" placeholder="Nombre" class="form-control" required/>
+              <input type="text" th:field="*{nombre}" 
+                     placeholder="(solo letras y espacios, 2-50 caracteres)" 
+                     class="form-control" required/>
               <div class="text-danger small" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></div>
             </div>
 
             <!-- Apellido -->
             <div class="mb-3">
               <label class="form-label">Apellido</label>
-              <input type="text" th:field="*{apellido}" placeholder="Apellido" class="form-control" required/>
+              <input type="text" th:field="*{apellido}" 
+                     placeholder="(solo letras y espacios, 2-50 caracteres)" 
+                     class="form-control" required/>
+                     
               <div class="text-danger small" th:if="${#fields.hasErrors('apellido')}" th:errors="*{apellido}"></div>
             </div>
 
             <!-- Correo -->
             <div class="mb-3">
               <label class="form-label">Correo</label>
-              <input type="email" th:field="*{correo}" placeholder="Correo" class="form-control" required/>
+              <input type="email" th:field="*{correo}" 
+                     placeholder="Ej: correo@dominio.com" 
+                     class="form-control" required/>
               <div class="text-danger small" th:if="${#fields.hasErrors('correo')}" th:errors="*{correo}"></div>
             </div>
 
             <!-- Contraseña -->
             <div class="mb-3">
               <label class="form-label">Contraseña</label>
-              <input type="password" th:field="*{contrasena}" placeholder="Contraseña" class="form-control" required/>
+              <input type="password" th:field="*{contrasena}"
+                     placeholder="Mínimo 6 caracteres" 
+                     class="form-control" required/>
+
+
               <div class="text-danger small" th:if="${#fields.hasErrors('contrasena')}" th:errors="*{contrasena}"></div>
             </div>
+
+            <!-- Confirmar contraseña -->
+            <div class="mb-3">
+              <label class="form-label">Confirmar contraseña</label>
+              <input type="password" th:field="*{confirmContrasena}"
+                      placeholder="Repite tu contraseña" 
+                      class="form-control" required/>
+                      
+              <div class="text-danger small" th:if="${#fields.hasErrors('confirmContrasena')}" th:errors="*{confirmContrasena}"></div>
+            </div>
+
 
 
 
@@ -64,6 +89,11 @@
               <button type="submit" class="btn btn-cta btn-caba-verde btn-lg">Registrarse</button>
 
             </div>
+
+            <p class="mt-3 text-center">
+              ¿Ya tienes cuenta? <a th:href="@{/login}">Inicia sesión</a>
+            </p>
+
 
 
             

@@ -41,7 +41,13 @@ public class AuthController {
 
     @PostMapping("/registro")
     public String registrarUsuario(@Valid @ModelAttribute("registerForm") RegisterForm form,
-                                BindingResult result) {
+                                BindingResult result, Model model) {
+        
+        
+        // Validar coincidencia de contraseñas
+        if(!form.getContrasena().equals(form.getConfirmContrasena())) {
+            result.rejectValue("confirmContrasena", "error.registerForm", "Las contraseñas no coinciden");
+        }
         if (result.hasErrors()) {
             return "registro";
         }
@@ -63,7 +69,8 @@ public class AuthController {
 
         usuarioRepository.save(admin);
 
-        return "redirect:/login";
+        model.addAttribute("mensajeExito", "Registro exitoso. Ahora puede iniciar sesión");
+        return "login";
     }
 
 }
