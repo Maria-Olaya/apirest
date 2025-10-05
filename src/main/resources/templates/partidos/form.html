@@ -27,10 +27,10 @@
 
           <div class="alert alert-danger" th:if="${errorMessage}" th:text="${errorMessage}"></div>
 
-          <form th:action="@{${partidoForm.idPartido} != null ? 
-            '/torneos/' + ${partidoForm.torneoId} + '/partidos/' + ${partidoForm.idPartido} + '/actualizar' :
-            '/torneos/' + ${partidoForm.torneoId} + '/partidos/guardar'}"
-            th:object="${partidoForm}" method="post" class="needs-validation" novalidate>
+          <form th:action="${partidoForm.idPartido != null} ?
+                  @{/torneos/{torneoId}/partidos/{partidoId}/actualizar(torneoId=${partidoForm.torneoId},partidoId=${partidoForm.idPartido})} :
+                  @{/torneos/{torneoId}/partidos/guardar(torneoId=${partidoForm.torneoId})}"
+                th:object="${partidoForm}" method="post" class="needs-validation" novalidate>
 
             <input type="hidden" th:field="*{idPartido}"/>
             <input type="hidden" th:field="*{torneoId}"/>

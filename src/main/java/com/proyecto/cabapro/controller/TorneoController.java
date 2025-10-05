@@ -148,7 +148,7 @@ public class TorneoController {
 
 
         model.addAttribute("torneo", torneo);
-        model.addAttribute("partidos", partidos);
+        
         return "torneos/detalle"; // vista donde muestras torneo + partidos
     }
 
