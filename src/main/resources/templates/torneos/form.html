@@ -25,8 +25,14 @@
                 <div class="card p-4 shadow-sm rounded-3">
                     <h2 class="mb-4 text-center" th:text="${torneoForm.idTorneo != null} ? 'Editar Torneo' : 'Crear Torneo'"></h2>
 
-                    <form th:action="@{${torneoForm.idTorneo != null} ? '/torneos/actualizar/' + ${torneoForm.idTorneo} : '/torneos/guardar'}"
-                        th:object="${torneoForm}" method="post" class="needs-validation" novalidate>
+                    <form th:action="${torneoForm.idTorneo != null} ?
+                                @{/torneos/actualizar/{id}(id=${torneoForm.idTorneo})} :
+                                @{/torneos/guardar}"
+                    th:object="${torneoForm}"
+                    method="post"
+                    class="needs-validation"
+                    novalidate>
+
 
                         <input type="hidden" th:field="*{idTorneo}"/>
 

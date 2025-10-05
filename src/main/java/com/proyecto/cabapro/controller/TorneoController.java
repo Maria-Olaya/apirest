@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.proyecto.cabapro.controller.forms.PartidoForm;
 import com.proyecto.cabapro.controller.forms.TorneoForm;
+import com.proyecto.cabapro.enums.CategoriaTorneo;
+import com.proyecto.cabapro.enums.TipoTorneo;
 import com.proyecto.cabapro.model.Partido;
 import com.proyecto.cabapro.model.Torneo;
 import com.proyecto.cabapro.service.PartidoService;
@@ -49,8 +51,12 @@ public class TorneoController {
     // Guardar torneo nuevo
     @PostMapping("/guardar")
     public String guardar(@Valid @ModelAttribute("torneoForm") TorneoForm torneoForm,
-                          BindingResult result) {
+                          BindingResult result,
+                          Model model) {
         if (result.hasErrors()) {
+            // Vuelve a pasar los enums al modelo
+            model.addAttribute("tiposTorneo", TipoTorneo.values());
+            model.addAttribute("categoriasTorneo", CategoriaTorneo.values());
             return "torneos/form";
         }
 
@@ -89,8 +95,11 @@ public class TorneoController {
     @PostMapping("/actualizar/{id}")
     public String actualizar(@PathVariable("id") int id,
                              @Valid @ModelAttribute("torneoForm") TorneoForm torneoForm,
-                             BindingResult result) {
+                             BindingResult result,
+                             Model model) {
         if (result.hasErrors()) {
+            model.addAttribute("tiposTorneo", TipoTorneo.values());
+            model.addAttribute("categoriasTorneo", CategoriaTorneo.values());
             return "torneos/form";
         }
 
@@ -119,6 +128,9 @@ public class TorneoController {
     }
 
   
+
+
+
     // -------------------------------------------------- Partido dentro de Torneo ------------------------------------------------- /
   
   
