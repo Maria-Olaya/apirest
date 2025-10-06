@@ -23,9 +23,6 @@
         <a sec:authorize="hasRole('ARBITRO')" href="/arbitro/asignaciones" class="nav-link-naranja">Mis asignaciones</a>
         <a sec:authorize="hasRole('ARBITRO')" href="/arbitro/liquidaciones" class="nav-link-naranja">Mis liquidaciones</a>
         
-        
-      
-
 
         <a sec:authorize="!hasRole('ADMIN') and !hasRole('ARBITRO')" href="/" class="nav-link-naranja">Dashboard</a>
 
@@ -35,6 +32,14 @@
       </div>
     </nav>
 
+    <!-- Selector de idioma -->
+      <form method="get" th:action="@{''}" class="ms-3">
+        <select name="lang" onchange="this.form.submit()" class="form-select form-select-sm" style="width:auto; display:inline-block;">
+          <option value="es" th:selected="${#locale.language == 'es'}">ES</option>
+          <option value="en" th:selected="${#locale.language == 'en'}">EN</option>
+        </select>
+      </form>
+    
     <div class="d-md-none">
       <button class="btn btn-sm btn-outline-secondary" type="button"
         onclick="document.querySelector('.mobile-menu').classList.toggle('d-none')">☰</button>
