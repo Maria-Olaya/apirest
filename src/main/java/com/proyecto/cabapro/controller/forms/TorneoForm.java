@@ -9,32 +9,46 @@ import com.proyecto.cabapro.enums.TipoTorneo;
 
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Future;
-import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.FutureOrPresent;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 
 
 public class TorneoForm {
 
     private Integer idTorneo; // Usado para edición
 
-    @NotEmpty(message = "El nombre es obligatorio")
+     // --- NOMBRE ---
+    @NotBlank(message = "El nombre es obligatorio")
+    @Size(min = 3, max = 100, message = "El nombre debe tener entre 3 y 100 caracteres")
+    @Pattern(
+        regexp = "^[A-Za-zÁÉÍÓÚáéíóúÑñ0-9\\s]+$",
+        message = "El nombre solo puede contener letras, números y espacios"
+    )
     private String nombre;
 
-    @NotNull(message = "El tipo de torneo es obligatorio")
-    private TipoTorneo tipoTorneo;   
 
+    // --- TIPO TORNEO ---
+    @NotNull(message = "El tipo de torneo es obligatorio")
+    private TipoTorneo tipoTorneo; 
+
+    // --- CATEGORÍA ---
     @NotNull(message = "La categoría es obligatoria")
-    private CategoriaTorneo categoria;  
+    private CategoriaTorneo categoria;    
   
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+     // --- FECHA INICIO ---
     @NotNull(message = "La fecha de inicio es obligatoria")
+    @FutureOrPresent(message = "La fecha de inicio no puede estar en el pasado")
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private LocalDateTime fechaInicio;
 
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    // --- FECHA FIN ---
     @NotNull(message = "La fecha de fin es obligatoria")
     @Future(message = "La fecha de fin debe estar en el futuro")
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private LocalDateTime fechaFin;
-
 
 
     
