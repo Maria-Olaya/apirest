@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Editar Perfil</title>
+  <title th:text="#{perfil.titulo}">Editar Perfil</title>
 
   <!-- Bootstrap -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -29,7 +29,13 @@
     <div class="row justify-content-center">
       <div class="col-md-8 col-lg-6">
         <div class="card p-4 shadow-sm rounded-3">
-          <h2 class="mb-4 text-center">Editar Perfil</h2>
+          <h2 class="mb-4 text-center" th:text="#{perfil.titulo}">Editar Perfil</h2>
+
+          <!-- Mensaje i18n de ERROR -->
+          <div th:if="${errCode}" class="alert alert-danger mb-3"
+               th:text="${errArg0} != null ? #messages.msg(errCode, errArg0) : #messages.msg(errCode)"></div>
+
+
 
           <form th:action="@{/arbitro/edit}" th:object="${arbitro}" method="post" class="needs-validation" novalidate>
 
@@ -40,14 +46,16 @@
 
             <!-- URL foto -->
             <div class="mb-3">
-              <label for="urlFoto" class="form-label">URL de la Foto:</label>
-              <input type="text" id="urlFoto" th:field="*{urlFoto}" placeholder="https://..." class="form-control"/>
+              <label for="urlFoto" class="form-label" th:text="#{perfil.urlFoto}">URL de la Foto:</label>
+              <input type="text" id="urlFoto" th:field="*{urlFoto}"
+                     class="form-control"
+                     th:attr="placeholder=#{perfil.url.placeholder}">
               <div class="text-danger small" th:if="${#fields.hasErrors('urlFoto')}" th:errors="*{urlFoto}"></div>
             </div>
 
             <!-- Fechas existentes -->
             <div class="mb-3">
-              <label class="form-label">Fechas Disponibles:</label>
+              <label class="form-label" th:text="#{perfil.fechasDisponibles}">Fechas Disponibles:</label>
 
               <div th:if="${arbitro.fechasDisponibles != null and !#lists.isEmpty(arbitro.fechasDisponibles)}">
                 <div th:each="f : ${#lists.sort(arbitro.fechasDisponibles)}"
@@ -62,36 +70,40 @@
                   </label>
 
                   <!-- Bloqueada si está asignada -->
-                  <div th:if="${asg}" class="d-flex align-items-center gap-2" title="Fecha bloqueada por asignación aceptada">
+                  <div th:if="${asg}" class="d-flex align-items-center gap-2"
+                       th:attr="title=#{perfil.fechaBloqueada}">
                     <input type="checkbox" checked disabled aria-disabled="true">
                     <span th:text="${#temporals.format(f,'yyyy-MM-dd')}">2025-01-01</span>
-                    <span class="asignada">[ASIGNADA]</span>
+                    <span class="asignada" th:text="#{perfil.asignada}">[ASIGNADA]</span>
                     <!-- Hidden para no perderla en el POST (inputs disabled no viajan) -->
                     <input type="hidden" name="fechasDisponibles" th:value="${#temporals.format(f,'yyyy-MM-dd')}">
                   </div>
                 </div>
               </div>
 
-              <p th:if="${arbitro.fechasDisponibles == null or #lists.isEmpty(arbitro.fechasDisponibles)}" class="text-muted">
+              <p th:if="${arbitro.fechasDisponibles == null or #lists.isEmpty(arbitro.fechasDisponibles)}"
+                 class="text-muted" th:text="#{perfil.sinFechas}">
                 — sin fechas —
               </p>
             </div>
 
             <!-- Añadir nuevas fechas -->
             <div class="mb-3">
-              <label class="form-label">Añadir Nuevas Fechas:</label>
+              <label class="form-label" th:text="#{perfil.nuevasFechas}">Añadir Nuevas Fechas:</label>
               <input type="date" name="fechasDisponibles" class="form-control mb-2">
               <input type="date" name="fechasDisponibles" class="form-control mb-2">
               <input type="date" name="fechasDisponibles" class="form-control mb-2">
               <input type="date" name="fechasDisponibles" class="form-control mb-2">
               <input type="date" name="fechasDisponibles" class="form-control mb-2">
-              <small>(deja en blanco los que no uses)</small>
+              <small th:text="#{perfil.hintNuevasFechas}">(deja en blanco los que no uses)</small>
             </div>
 
             <!-- Botones -->
             <div class="d-grid gap-2 mt-4">
-              <button type="submit" class="btn btn-cta btn-md btn-caba-naranja">Guardar</button>
-              <a th:href="@{/arbitro/dashboard}" class="btn btn-cta btn-md btn-caba-verde text-center">Cancelar</a>
+              <button type="submit" class="btn btn-cta btn-md btn-caba-naranja"
+                      th:text="#{perfil.guardar}">Guardar</button>
+              <a th:href="@{/arbitro/dashboard}" class="btn btn-cta btn-md btn-caba-verde text-center"
+                 th:text="#{perfil.cancelar}">Cancelar</a>
             </div>
 
           </form>
