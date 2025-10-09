@@ -23,7 +23,15 @@ public class PartidoService {
     @Autowired
     private MessageSource messageSource;
 
+    private String estadoTraducido;
 
+    public String getEstadoTraducido() {
+        return estadoTraducido;
+    }
+
+    public void setEstadoTraducido(String estadoTraducido) {
+        this.estadoTraducido = estadoTraducido;
+    }
 
     public List<Partido> getAllPartidos() {
         return partidoRepository.findAll();
@@ -88,8 +96,22 @@ public class PartidoService {
         return partidoRepository.findByTorneo_IdTorneo(torneoId);
     }
     public List<Partido> obtenerPorTorneo(Torneo torneo) {
-        return partidoRepository.findByTorneo_IdTorneo(torneo.getIdTorneo());
+        List<Partido> partidos = partidoRepository.findByTorneo_IdTorneo(torneo.getIdTorneo());
+        
+        partidos.forEach(p -> {
+            actualizarEstado(p); // mantiene tu lógica de actualizar estado
+            // agrega estado traducido
+            String mensaje = messageSource.getMessage(
+                p.getEstadoPartido().getMensajeKey(),
+                null,
+                LocaleContextHolder.getLocale()
+            );
+            p.setEstadoTraducido(mensaje);
+        });
+        
+        return partidos;
     }
+
 
 
     public List<Partido> getPartidosByArbitro(int arbitroId) {

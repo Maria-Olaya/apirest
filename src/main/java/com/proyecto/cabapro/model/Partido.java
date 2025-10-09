@@ -49,6 +49,13 @@ public class Partido {
     )
     private List<Arbitro> arbitros = new ArrayList<>();
 
+    private String estadoTraducido;
+
+    public String getEstadoTraducido() { return estadoTraducido; }
+    public void setEstadoTraducido(String estadoTraducido) { this.estadoTraducido = estadoTraducido; }
+
+
+
     // Getters y Setters
     public int getIdPartido() {
         return idPartido;

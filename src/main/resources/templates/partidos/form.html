@@ -51,9 +51,10 @@
             <div class="mb-3" th:if="${partidoForm.idPartido != null}">
               <label class="form-label" th:text="#{partido.estado}"></label>
               <select th:field="*{estadoPartido}" class="form-select">
-                <option value="PROGRAMADO" th:text="#{partido.estado.programado}"></option>
-                <option value="CANCELADO" th:text="#{partido.estado.cancelado}"></option>
+                  <option value="PROGRAMADO" th:text="#{partido.estado.programado}"></option>
+                  <option value="CANCELADO" th:text="#{partido.estado.cancelado}"></option>
               </select>
+
               <div class="text-danger small" th:if="${#fields.hasErrors('estadoPartido')}" th:errors="*{estadoPartido}"></div>
             </div>
 
