@@ -3,10 +3,14 @@ package com.proyecto.cabapro.service;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 
 import com.proyecto.cabapro.model.Torneo;
 import com.proyecto.cabapro.repository.TorneoRepository;
+
+
 
 // TorneoService.java
 // Clase de servicio que contiene la lógica de negocio relacionada con los torneos.
@@ -16,10 +20,14 @@ public class TorneoService {
 
     // Repositorio para acceder a los datos de Torneo en la base de datos
     private final TorneoRepository torneoRepository;
+    private final MessageSource messageSource;
+
 
     // Constructor con inyección de dependencias
-    public TorneoService(TorneoRepository torneoRepository) {
+   @Autowired
+    public TorneoService(TorneoRepository torneoRepository, MessageSource messageSource) {
         this.torneoRepository = torneoRepository;
+        this.messageSource = messageSource;
     }
 
     // Guarda o actualiza un torneo en la base de datos

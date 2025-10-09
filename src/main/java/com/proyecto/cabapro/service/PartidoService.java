@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.proyecto.cabapro.controller.forms.PartidoForm;
@@ -18,6 +20,9 @@ public class PartidoService {
 
     @Autowired
     private PartidoRepository partidoRepository;
+    @Autowired
+    private MessageSource messageSource;
+
 
 
     public List<Partido> getAllPartidos() {
@@ -35,15 +40,20 @@ public class PartidoService {
     public Partido savePartido(Partido partido) {
         var torneo = partido.getTorneo();
         if (torneo == null) {
-            throw new IllegalArgumentException("Debe seleccionar un torneo");
+            throw new IllegalArgumentException(
+            messageSource.getMessage("partido.error.sin_torneo", null, LocaleContextHolder.getLocale())
+        );
         }
 
         if (torneo.getFechaInicio() != null && partido.getFecha().isBefore(torneo.getFechaInicio())) {
-            throw new IllegalArgumentException("La fecha del partido no puede ser antes del inicio del torneo");
+            throw new IllegalArgumentException(
+            messageSource.getMessage("partido.error.fecha_antes_inicio", null, LocaleContextHolder.getLocale())
+        );
         }
         if (torneo.getFechaFin() != null && partido.getFecha().isAfter(torneo.getFechaFin())) {
-            throw new IllegalArgumentException("La fecha del partido no puede ser después de la finalización del torneo");
-        }
+            throw new IllegalArgumentException(
+            messageSource.getMessage("partido.error.fecha_despues_fin", null, LocaleContextHolder.getLocale())
+        );        }
 
         return partidoRepository.save(partido);
     }
