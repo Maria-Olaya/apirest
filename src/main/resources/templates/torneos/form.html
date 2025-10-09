@@ -57,10 +57,15 @@
                         <!-- Categoría -->
                         <div class="mb-3">
                             <label for="categoria" class="form-label" th:text="#{torneo.categoria}"></label>
+                           
                             <select id="categoria" th:field="*{categoria}" class="form-select">
                                 <option th:each="cat : ${T(com.proyecto.cabapro.enums.CategoriaTorneo).values()}"
-                                        th:value="${cat}" th:text="${cat}"></option>
+                                        th:value="${cat}" 
+                                        th:text="${#messages.msg(cat.mensajeKey)}">
+                                </option>
                             </select>
+
+
                             <div class="text-danger small" th:if="${#fields.hasErrors('categoria')}" th:errors="*{categoria}"></div>
                         </div>
 
