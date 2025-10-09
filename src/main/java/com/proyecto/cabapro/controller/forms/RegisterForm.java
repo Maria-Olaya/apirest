@@ -8,25 +8,25 @@ import jakarta.validation.constraints.Size;
 
 public class RegisterForm {
 
-    @NotBlank(message = "El nombre es obligatorio")
-    @Size(min = 2, max = 50, message = "El nombre debe tener entre 2 y 50 caracteres")
-    @Pattern(regexp = "^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$", message = "El nombre solo puede contener letras y espacios")
+    @NotBlank(message = "{registro.nombre.obligatorio}")
+    @Size(min = 2, max = 50, message = "{registro.nombre.tamano}")
+    @Pattern(regexp = "^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$", message = "{registro.nombre.pattern}")
     private String nombre;
 
-    @NotBlank(message = "El apellido es obligatorio")
-    @Size(min = 2, max = 50, message = "El apellido debe tener entre 2 y 50 caracteres")
-    @Pattern(regexp = "^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$", message = "El apellido solo puede contener letras y espacios")
+    @NotBlank(message = "{registro.apellido.obligatorio}")
+    @Size(min = 2, max = 50, message = "{registro.apellido.tamano}")
+    @Pattern(regexp = "^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$", message = "{registro.apellido.pattern}")
     private String apellido;
 
-    @NotBlank(message = "El correo es obligatorio")
-    @Email(message = "Debe ser un correo válido")
+    @NotBlank(message = "{registro.correo.obligatorio}")
+    @Email(message = "{registro.correo.invalido}")
     private String correo;
 
-    @NotBlank(message = "La contraseña es obligatoria")
-    @Size(min = 6, max = 100, message = "La contraseña debe tener al menos 6 caracteres")
+    @NotBlank(message = "{registro.contrasena.obligatoria}")
+    @Size(min = 6, max = 100, message = "{registro.contrasena.tamano}")
     private String contrasena;
 
-    @NotBlank(message = "Debe confirmar la contraseña")
+    @NotBlank(message = "{registro.confirmContrasena.obligatoria}")
     private String confirmContrasena;
 
 

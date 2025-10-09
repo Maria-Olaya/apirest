@@ -2,6 +2,9 @@ package com.proyecto.cabapro.controller;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -25,6 +28,9 @@ import jakarta.validation.Valid;
 @Controller
 @RequestMapping("/torneos")
 public class TorneoController {
+    @Autowired
+    private MessageSource messageSource;
+
 
     private final TorneoService torneoService;
     PartidoService partidoService;
@@ -176,13 +182,16 @@ public class TorneoController {
                 partidoService.crearPartido(partidoForm, torneo);
                 return "redirect:/torneos/" + torneoId;
             } catch (IllegalArgumentException ex) {
-                model.addAttribute("errorMessage", ex.getMessage());
+                String mensaje = messageSource.getMessage(ex.getMessage(), null, ex.getMessage(), LocaleContextHolder.getLocale());
+                model.addAttribute("errorMessage", mensaje);
+
                 return "partidos/form";
             }
 
         
     }
    
+
     @GetMapping("/{torneoId}/partidos/editar/{partidoId}")
     public String mostrarFormEditarPartido(@PathVariable int torneoId,
                                         @PathVariable int partidoId,
@@ -226,7 +235,9 @@ public class TorneoController {
             partidoService.actualizarPartido(partido, partidoForm);
             return "redirect:/torneos/" + torneoId;
         } catch (IllegalArgumentException ex) {
-            model.addAttribute("errorMessage", ex.getMessage());
+            String mensaje = messageSource.getMessage(ex.getMessage(), null, ex.getMessage(), LocaleContextHolder.getLocale());
+            model.addAttribute("errorMessage", mensaje);
+
             return "partidos/form";
         }
 
