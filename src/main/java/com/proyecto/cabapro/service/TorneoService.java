@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.proyecto.cabapro.model.Torneo;
@@ -37,8 +38,11 @@ public class TorneoService {
 
     // Devuelve la lista completa de torneos
     public List<Torneo> listarTorneos() {
-        return torneoRepository.findAll();
+        List<Torneo> torneos = torneoRepository.findAll();
+        torneos.forEach(this::traducirCategoria);
+        return torneos;
     }
+
 
     // Obtiene un torneo por su ID, devuelve null si no existe
     public Torneo obtenerPorId(int id) {
@@ -54,4 +58,18 @@ public class TorneoService {
     public void eliminarTorneo(int id) {
         torneoRepository.deleteById(id);
     }
+
+
+
+    public void traducirCategoria(Torneo torneo) {
+    if (torneo.getCategoria() != null) {
+        String mensaje = messageSource.getMessage(
+            torneo.getCategoria().getMensajeKey(),
+            null,
+            LocaleContextHolder.getLocale()
+        );
+        torneo.setCategoriaTraducida(mensaje);
+    }
+}
+
 }
