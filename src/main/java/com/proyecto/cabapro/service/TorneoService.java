@@ -48,8 +48,15 @@ public class TorneoService {
 
     // Obtiene un torneo por su ID, devuelve null si no existe
     public Torneo obtenerPorId(int id) {
-        return torneoRepository.findById(id).orElse(null);
+        return torneoRepository.findById(id)
+            .map(t -> {
+                traducirCategoria(t);
+                traducirTipo(t);
+                return t;
+            })
+            .orElse(null);
     }
+
 
     // Obtiene un torneo por su nombre, devuelve Optional para manejar el caso "no encontrado"
     public Optional<Torneo> obtenerPorNombre(String nombre) {
