@@ -46,7 +46,9 @@
         <tbody>
           <tr th:each="torneo : ${torneos}">
             <td th:text="${torneo.idTorneo}"></td>
-            <td th:text="${torneo.tipoTorneo}"></td>
+            <td th:text="${torneo.tipoTraducido}"></td>
+
+
             <td th:text="${torneo.categoriaTraducida}"></td>
             <td th:text="${torneo.fechaInicio}"></td>
             <td th:text="${torneo.fechaFin}"></td>

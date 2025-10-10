@@ -49,8 +49,10 @@
                             <label for="tipoTorneo" class="form-label" th:text="#{torneo.tipo}"></label>
                             <select id="tipoTorneo" th:field="*{tipoTorneo}" class="form-select">
                                 <option th:each="tipo : ${T(com.proyecto.cabapro.enums.TipoTorneo).values()}"
-                                        th:value="${tipo}" th:text="${tipo}"></option>
+                                        th:value="${tipo}" 
+                                        th:text="${#messages.msgOrNull(tipo.getMensajeKey())}"></option>
                             </select>
+
                             <div class="text-danger small" th:if="${#fields.hasErrors('tipoTorneo')}" th:errors="*{tipoTorneo}"></div>
                         </div>
 

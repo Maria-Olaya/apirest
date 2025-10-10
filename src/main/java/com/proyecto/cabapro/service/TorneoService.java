@@ -39,10 +39,12 @@ public class TorneoService {
     // Devuelve la lista completa de torneos
     public List<Torneo> listarTorneos() {
         List<Torneo> torneos = torneoRepository.findAll();
-        torneos.forEach(this::traducirCategoria);
+        torneos.forEach(t -> {
+            traducirCategoria(t);
+            traducirTipo(t);
+        });
         return torneos;
     }
-
 
     // Obtiene un torneo por su ID, devuelve null si no existe
     public Torneo obtenerPorId(int id) {
@@ -62,14 +64,25 @@ public class TorneoService {
 
 
     public void traducirCategoria(Torneo torneo) {
-    if (torneo.getCategoria() != null) {
-        String mensaje = messageSource.getMessage(
-            torneo.getCategoria().getMensajeKey(),
-            null,
-            LocaleContextHolder.getLocale()
-        );
-        torneo.setCategoriaTraducida(mensaje);
+        if (torneo.getCategoria() != null) {
+            String mensaje = messageSource.getMessage(
+                torneo.getCategoria().getMensajeKey(),
+                null,
+                LocaleContextHolder.getLocale()
+            );
+            torneo.setCategoriaTraducida(mensaje);
+        }
     }
-}
+
+    public void traducirTipo(Torneo torneo) {
+        if (torneo.getTipoTorneo() != null) {
+            String mensaje = messageSource.getMessage(
+                torneo.getTipoTorneo().getMensajeKey(),
+                null,
+                LocaleContextHolder.getLocale()
+            );
+            torneo.setTipoTraducido(mensaje); // necesitas agregar tipoTraducido en el modelo
+        }
+    }
 
 }

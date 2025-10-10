@@ -43,6 +43,14 @@ public class Torneo {
         @Transient // No se guarda en la BD
         private String categoriaTraducida;
 
+
+        @Transient
+        private String tipoTraducido;
+
+        public String getTipoTraducido() { return tipoTraducido; }
+        public void setTipoTraducido(String tipoTraducido) { this.tipoTraducido = tipoTraducido; }
+
+
         // GETTER Y SETTER
         public String getCategoriaTraducida() {
             return categoriaTraducida;
