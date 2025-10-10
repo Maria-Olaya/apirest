@@ -97,20 +97,26 @@ public class PartidoService {
     }
     public List<Partido> obtenerPorTorneo(Torneo torneo) {
         List<Partido> partidos = partidoRepository.findByTorneo_IdTorneo(torneo.getIdTorneo());
-        
+
         partidos.forEach(p -> {
-            actualizarEstado(p); // mantiene tu lógica de actualizar estado
-            // agrega estado traducido
+            actualizarEstado(p);        // mantiene tu lógica actual
+            traducirEstado(p);          // ahora separado
+        });
+
+        return partidos;
+    }
+
+    private void traducirEstado(Partido partido) {
+        if (partido.getEstadoPartido() != null) {
             String mensaje = messageSource.getMessage(
-                p.getEstadoPartido().getMensajeKey(),
+                partido.getEstadoPartido().getMensajeKey(),
                 null,
                 LocaleContextHolder.getLocale()
             );
-            p.setEstadoTraducido(mensaje);
-        });
-        
-        return partidos;
+            partido.setEstadoTraducido(mensaje);
+        }
     }
+
 
 
 
