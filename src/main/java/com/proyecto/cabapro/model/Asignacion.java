@@ -1,6 +1,8 @@
 package com.proyecto.cabapro.model;
 
 import com.proyecto.cabapro.enums.EstadoAsignacion;
+
+import jakarta.persistence.Transient;
 import jakarta.persistence.*;
 import java.math.BigDecimal;            
 import java.time.LocalDate;
@@ -36,6 +38,12 @@ public class Asignacion {
 
     @Column(name = "monto", precision = 14, scale = 2, nullable = false)
     private BigDecimal monto = BigDecimal.ZERO;      
+
+    @Transient
+    private String estadoTraducido;
+
+    public String getEstadoTraducido() { return estadoTraducido; }
+    public void setEstadoTraducido(String estadoTraducido) { this.estadoTraducido = estadoTraducido; }
 
     public Asignacion() {}
 
