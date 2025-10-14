@@ -2,7 +2,7 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
-  <title>CABA Pro - Detalle Torneo</title>
+  <title  th:text="#{torneo.detalleTitulo}"></title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <!-- Bootstrap -->
@@ -27,7 +27,8 @@
       <h1 class="fw-bold text-success">
          <span th:text="#{torneo.detalleTitulo}"></span>: <span th:text="${torneo.nombre}"></span>
       </h1>
-      <p><strong th:text="#{torneo.categoria}"></strong> <span th:text="${torneo.categoria}"></span></p>
+      <p><strong th:text="#{torneo.categoria}"></strong> <span th:text="${torneo.categoriaTraducida}"></span></p>
+      <p><strong th:text="#{torneo.tipo}"></strong> <span th:text="${torneo.tipoTraducido}"></span></p>
       <p><strong th:text="#{torneo.fechaInicio}"></strong> <span th:text="${torneo.fechaInicio}"></span></p>
       <p><strong th:text="#{torneo.fechaFin}"></strong> <span th:text="${torneo.fechaFin}"></span></p>
 
@@ -65,7 +66,8 @@
             <td th:text="${partido.idPartido}" class="text-center"></td>
             <td th:text="${partido.fecha}"></td>
             <td th:text="${partido.lugar}"></td>
-            <td th:text="${partido.estadoPartido}"></td>
+            <td th:text="${partido.estadoTraducido}"></td>
+
             <td th:text="${partido.equipoLocal}"></td>
             <td th:text="${partido.equipoVisitante}"></td>
             <td>
@@ -74,18 +76,21 @@
             <td class="text-center">
               <!-- Editar -->
               <a th:href="@{'/partidos/editar/' + ${partido.idPartido}}" 
-                 class="btn btn-sm btn-caba-naranja" title="Editar">
-                 <i class="bi bi-pencil-square"></i>
+                    th:title="#{boton.editar}"
+                    class="btn btn-sm btn-caba-naranja" >
+                    <i class="bi bi-pencil-square"></i>
               </a>
               <!-- Eliminar -->
               <a th:href="@{'/torneos/' + ${torneo.idTorneo} + '/partidos/eliminar/' + ${partido.idPartido}}"
+                th:title="#{boton.eliminar}"
                 onclick="return confirm('¿Eliminar este partido?');"
-                class="btn btn-sm btn-caba-peligro" title="Eliminar">
+                class="btn btn-sm btn-caba-peligro" >
                 <i class="bi bi-trash"></i>
               </a>
 
               <!-- Asignar árbitros -->
               <a th:href="@{'/asignacion/crear?partidoId=' + ${partido.idPartido}}"
+                 th:title="#{boton.asignarArbitros}"
                  class="btn btn-sm btn-caba-verde" title="Asignar árbitros">
                  <i class="bi bi-person-check"></i>
               </a>

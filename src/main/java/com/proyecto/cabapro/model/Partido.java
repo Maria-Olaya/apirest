@@ -19,6 +19,7 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 @Entity
 @Table(name = "partidos")
@@ -48,6 +49,14 @@ public class Partido {
         inverseJoinColumns = @JoinColumn(name = "arbitro_id")
     )
     private List<Arbitro> arbitros = new ArrayList<>();
+    
+    @Transient
+    private String estadoTraducido;
+
+    public String getEstadoTraducido() { return estadoTraducido; }
+    public void setEstadoTraducido(String estadoTraducido) { this.estadoTraducido = estadoTraducido; }
+
+
 
     // Getters y Setters
     public int getIdPartido() {

@@ -16,6 +16,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 @Entity
 @Table(name = "torneos")
@@ -38,6 +39,27 @@ public class Torneo {
 
     @OneToMany(mappedBy = "torneo", fetch = FetchType.LAZY, cascade = CascadeType.ALL)  // cargar partidos solo si los pides
     private List<Partido> partidos;
+
+        @Transient // No se guarda en la BD
+        private String categoriaTraducida;
+
+
+        @Transient
+        private String tipoTraducido;
+
+        public String getTipoTraducido() { return tipoTraducido; }
+        public void setTipoTraducido(String tipoTraducido) { this.tipoTraducido = tipoTraducido; }
+
+
+        // GETTER Y SETTER
+        public String getCategoriaTraducida() {
+            return categoriaTraducida;
+        }
+
+        public void setCategoriaTraducida(String categoriaTraducida) {
+            this.categoriaTraducida = categoriaTraducida;
+        }
+
 
     // Getters y Setters
     public int getIdTorneo() {

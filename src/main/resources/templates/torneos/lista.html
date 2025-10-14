@@ -46,30 +46,32 @@
         <tbody>
           <tr th:each="torneo : ${torneos}">
             <td th:text="${torneo.idTorneo}"></td>
-            <td th:text="${torneo.tipoTorneo}"></td>
-            <td th:text="${torneo.categoria}"></td>
+            <td th:text="${torneo.tipoTraducido}"></td>
+
+
+            <td th:text="${torneo.categoriaTraducida}"></td>
             <td th:text="${torneo.fechaInicio}"></td>
             <td th:text="${torneo.fechaFin}"></td>
             <td class="text-center">
                 <!-- Ver (verde identidad) -->
-                <a th:href="@{'/torneos/' + ${torneo.idTorneo}}" 
-                    class="btn btn-sm btn-caba-verde" 
-                    title="Ver">
-                    <i class="bi bi-eye"></i>
+                <a th:href="@{'/torneos/' + ${torneo.idTorneo}}"
+                  th:title="#{boton.ver}"
+                  class="btn btn-sm btn-caba-verde">
+                  <i class="bi bi-eye"></i>
                 </a>
 
                 <!-- Editar (naranja identidad) -->
                 <a th:href="@{'/torneos/editar/' + ${torneo.idTorneo}}" 
-                    class="btn btn-sm btn-caba-naranja" 
-                    title="Editar">
+                    th:title="#{boton.editar}"
+                    class="btn btn-sm btn-caba-naranja" >
                     <i class="bi bi-pencil-square"></i>
                 </a>
 
                 <!-- Eliminar (rojo derivado) -->
                 <a th:href="@{'/torneos/eliminar/' + ${torneo.idTorneo}}"
+                    th:title="#{boton.eliminar}"
                     onclick="return confirm('¿Estás seguro de eliminar este torneo?');"
-                    class="btn btn-sm btn-caba-peligro" 
-                    title="Eliminar">
+                    class="btn btn-sm btn-caba-peligro" >
                     <i class="bi bi-trash"></i>
                 </a>
             </td>

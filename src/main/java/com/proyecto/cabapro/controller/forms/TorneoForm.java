@@ -20,35 +20,32 @@ public class TorneoForm {
 
     private Integer idTorneo; // Usado para edición
 
-     // --- NOMBRE ---
-    @NotBlank(message = "El nombre es obligatorio")
-    @Size(min = 3, max = 100, message = "El nombre debe tener entre 3 y 100 caracteres")
-    @Pattern(
-        regexp = "^[A-Za-zÁÉÍÓÚáéíóúÑñ0-9\\s]+$",
-        message = "El nombre solo puede contener letras, números y espacios"
-    )
+    // --- NOMBRE ---
+    @NotBlank(message = "{torneo.nombre.obligatorio}")
+    @Size(min = 3, max = 100, message = "{torneo.nombre.tamano}")
+    @Pattern(regexp = "^[A-Za-zÁÉÍÓÚáéíóúÑñ0-9\\s]+$", message = "{torneo.nombre.pattern}")
     private String nombre;
 
-
     // --- TIPO TORNEO ---
-    @NotNull(message = "El tipo de torneo es obligatorio")
+    @NotNull(message = "{torneo.tipo.obligatorio}")
     private TipoTorneo tipoTorneo; 
 
     // --- CATEGORÍA ---
-    @NotNull(message = "La categoría es obligatoria")
+    @NotNull(message = "{torneo.categoria.obligatoria}")
     private CategoriaTorneo categoria;    
-  
-     // --- FECHA INICIO ---
-    @NotNull(message = "La fecha de inicio es obligatoria")
-    @FutureOrPresent(message = "La fecha de inicio no puede estar en el pasado")
+
+    // --- FECHA INICIO ---
+    @NotNull(message = "{torneo.fechaInicio.obligatoria}")
+    @FutureOrPresent(message = "{torneo.fechaInicio.futuro}")
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private LocalDateTime fechaInicio;
 
     // --- FECHA FIN ---
-    @NotNull(message = "La fecha de fin es obligatoria")
-    @Future(message = "La fecha de fin debe estar en el futuro")
+    @NotNull(message = "{torneo.fechaFin.obligatoria}")
+    @Future(message = "{torneo.fechaFin.futuro}")
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private LocalDateTime fechaFin;
+
 
 
     

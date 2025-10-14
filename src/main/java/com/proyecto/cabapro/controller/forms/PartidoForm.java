@@ -16,30 +16,30 @@ public class PartidoForm {
 
     private Integer idPartido;
 
-    @NotNull(message = "La fecha es obligatoria")
+    @NotNull(message = "{partido.fecha.obligatoria}")
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private LocalDateTime fecha;
 
-    @NotBlank(message = "El lugar es obligatorio")
-    @Size(min = 3, max = 100, message = "El lugar debe tener entre 3 y 100 caracteres")
-    @Pattern(regexp = "^[A-Za-zÁÉÍÓÚáéíóúÑñ0-9\\s]+$", message = "El lugar solo puede contener letras, números y espacios")
+    @NotBlank(message = "{partido.lugar.obligatorio}")
+    @Size(min = 3, max = 100, message = "{partido.lugar.tamano}")
+    @Pattern(regexp = "^[A-Za-zÁÉÍÓÚáéíóúÑñ0-9\\s]+$", message = "{partido.lugar.pattern}")
     private String lugar;
 
-   
     private EstadoPartido estadoPartido;
 
-    @NotBlank(message = "El equipo local es obligatorio")
-    @Size(min = 3, max = 50, message = "El equipo local debe tener entre 3 y 50 caracteres")
-    @Pattern(regexp = "^[A-Za-zÁÉÍÓÚáéíóúÑñ0-9\\s]+$", message = "El equipo local solo puede contener letras, números y espacios")
+    @NotBlank(message = "{partido.equipoLocal.obligatorio}")
+    @Size(min = 3, max = 50, message = "{partido.equipoLocal.tamano}")
+    @Pattern(regexp = "^[A-Za-zÁÉÍÓÚáéíóúÑñ0-9\\s]+$", message = "{partido.equipoLocal.pattern}")
     private String equipoLocal;
 
-    @NotBlank(message = "El equipo visitante es obligatorio")
-    @Size(min = 3, max = 50, message = "El equipo visitante debe tener entre 3 y 50 caracteres")
-    @Pattern(regexp = "^[A-Za-zÁÉÍÓÚáéíóúÑñ0-9\\s]+$", message = "El equipo visitante solo puede contener letras, números y espacios")
+    @NotBlank(message = "{partido.equipoVisitante.obligatorio}")
+    @Size(min = 3, max = 50, message = "{partido.equipoVisitante.tamano}")
+    @Pattern(regexp = "^[A-Za-zÁÉÍÓÚáéíóúÑñ0-9\\s]+$", message = "{partido.equipoVisitante.pattern}")
     private String equipoVisitante;
 
-    @NotNull(message = "Debe seleccionar un torneo")
+    @NotNull(message = "{partido.torneo.obligatorio}")
     private Integer torneoId;
+
 
 
     // Getters y setters
