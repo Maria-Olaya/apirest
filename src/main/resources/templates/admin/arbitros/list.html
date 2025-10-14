@@ -56,7 +56,10 @@
               </div>
             </td>
             <td th:text="${as.fechaAsignacion}"></td>
-            <td class="estado" th:classappend="${' ' + as.estado}" th:text="${as.estado}"></td>
+            <td class="estado"
+                th:classappend="${' ' + (as.estado != null ? #strings.toLowerCase(as.estado.name()) : '')}"
+                th:text="${as.estadoTraducido}">
+            </td>
           </tr>
 
           <tr th:if="${#lists.isEmpty(asignacionesSel)}">
