@@ -1,0 +1,389 @@
+C:\Users\H´p\Desktop\caba 2\apirest\revision_usabilidad\src\main\java\com\proyecto\cabapro\model\Torneo.java
+package com.proyecto.cabapro.model;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+import com.proyecto.cabapro.enums.CategoriaTorneo;
+import com.proyecto.cabapro.enums.TipoTorneo;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+
+@Entity
+@Table(name = "torneos")
+public class Torneo {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int idTorneo;
+
+    private String nombre;      
+    
+    @Enumerated(EnumType.STRING)
+    private TipoTorneo tipoTorneo;
+    
+    @Enumerated(EnumType.STRING) // <-- guarda el nombre del enum (no el número)
+    private CategoriaTorneo categoria;
+
+    private LocalDateTime fechaInicio;
+    private LocalDateTime fechaFin;
+
+    @OneToMany(mappedBy = "torneo", fetch = FetchType.LAZY, cascade = CascadeType.ALL)  // cargar partidos solo si los pides
+    private List<Partido> partidos;
+
+        @Transient // No se guarda en la BD
+        private String categoriaTraducida;
+
+
+        @Transient
+        private String tipoTraducido;
+
+        public String getTipoTraducido() { return tipoTraducido; }
+        public void setTipoTraducido(String tipoTraducido) { this.tipoTraducido = tipoTraducido; }
+
+
+        // GETTER Y SETTER
+        public String getCategoriaTraducida() {
+            return categoriaTraducida;
+        }
+
+        public void setCategoriaTraducida(String categoriaTraducida) {
+            this.categoriaTraducida = categoriaTraducida;
+        }
+
+
+    // Getters y Setters
+    public int getIdTorneo() {
+        return idTorneo;
+    }
+
+    public void setIdTorneo(int idTorneo) {
+        this.idTorneo = idTorneo;
+    }
+
+    public String getNombre() {   
+        return nombre;
+    }
+
+    public void setNombre(String nombre) {  
+        this.nombre = nombre;
+    }
+
+    public TipoTorneo getTipoTorneo() {
+    return tipoTorneo;
+}
+
+    public void setTipoTorneo(TipoTorneo tipoTorneo) {
+        this.tipoTorneo = tipoTorneo;
+    }
+
+
+    
+
+    public CategoriaTorneo getCategoria() {
+        return categoria;
+    }
+
+    public void setCategoria(CategoriaTorneo categoria) {
+        this.categoria = categoria;
+    }
+
+    public LocalDateTime getFechaInicio() {
+        return fechaInicio;
+    }
+
+    public void setFechaInicio(LocalDateTime fechaInicio) {
+        this.fechaInicio = fechaInicio;
+    }
+
+    public LocalDateTime getFechaFin() {
+        return fechaFin;
+    }
+
+    public void setFechaFin(LocalDateTime fechaFin) {
+        this.fechaFin = fechaFin;
+    }
+
+    public List<Partido> getPartidos() {
+        return partidos;
+    }
+
+    public void setPartidos(List<Partido> partidos) {
+        this.partidos = partidos;
+    }
+}
+
+
+C:\Users\H´p\Desktop\caba 2\apirest\revision_usabilidad\src\main\java\com\proyecto\cabapro\repository\TorneoRepository.java
+
+package com.proyecto.cabapro.repository;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.proyecto.cabapro.enums.CategoriaTorneo;
+import com.proyecto.cabapro.enums.TipoTorneo;
+import com.proyecto.cabapro.model.Torneo;
+
+public interface TorneoRepository extends JpaRepository<Torneo, Integer> {
+
+    
+    List<Torneo> findByTipoTorneo(TipoTorneo tipoTorneo);
+    List<Torneo> findByCategoria(CategoriaTorneo categoria);
+
+    List<Torneo> findByFechaFinAfter(LocalDateTime fechaActual);
+    List<Torneo> findByFechaInicioBetween(LocalDateTime inicio, LocalDateTime fin);
+
+    Optional<Torneo> findByNombre(String nombre);
+}
+
+
+C:\Users\H´p\Desktop\caba 2\apirest\revision_usabilidad\src\main\java\com\proyecto\cabapro\service\TorneoService.java
+
+
+package com.proyecto.cabapro.service;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.stereotype.Service;
+
+import com.proyecto.cabapro.model.Torneo;
+import com.proyecto.cabapro.repository.TorneoRepository;
+
+
+
+// TorneoService.java
+// Clase de servicio que contiene la lógica de negocio relacionada con los torneos.
+// Actúa como intermediario entre los controladores y el repositorio.
+@Service
+public class TorneoService {
+
+    // Repositorio para acceder a los datos de Torneo en la base de datos
+    private final TorneoRepository torneoRepository;
+    private final MessageSource messageSource;
+
+
+    // Constructor con inyección de dependencias
+   @Autowired
+    public TorneoService(TorneoRepository torneoRepository, MessageSource messageSource) {
+        this.torneoRepository = torneoRepository;
+        this.messageSource = messageSource;
+    }
+
+    // Guarda o actualiza un torneo en la base de datos
+    public Torneo guardarTorneo(Torneo torneo) {
+        return torneoRepository.save(torneo);
+    }
+
+    // Devuelve la lista completa de torneos
+    public List<Torneo> listarTorneos() {
+        List<Torneo> torneos = torneoRepository.findAll();
+        torneos.forEach(t -> {
+            traducirCategoria(t);
+            traducirTipo(t);
+        });
+        return torneos;
+    }
+
+    // Obtiene un torneo por su ID, devuelve null si no existe
+    public Torneo obtenerPorId(int id) {
+        return torneoRepository.findById(id)
+            .map(t -> {
+                traducirCategoria(t);
+                traducirTipo(t);
+                return t;
+            })
+            .orElse(null);
+    }
+
+
+    // Obtiene un torneo por su nombre, devuelve Optional para manejar el caso "no encontrado"
+    public Optional<Torneo> obtenerPorNombre(String nombre) {
+        return torneoRepository.findByNombre(nombre);
+    }
+
+    // Elimina un torneo por su ID
+    public void eliminarTorneo(int id) {
+        torneoRepository.deleteById(id);
+    }
+
+
+
+    public void traducirCategoria(Torneo torneo) {
+        if (torneo.getCategoria() != null) {
+            String mensaje = messageSource.getMessage(
+                torneo.getCategoria().getMensajeKey(),
+                null,
+                LocaleContextHolder.getLocale()
+            );
+            torneo.setCategoriaTraducida(mensaje);
+        }
+    }
+
+    public void traducirTipo(Torneo torneo) {
+        if (torneo.getTipoTorneo() != null) {
+            String mensaje = messageSource.getMessage(
+                torneo.getTipoTorneo().getMensajeKey(),
+                null,
+                LocaleContextHolder.getLocale()
+            );
+            torneo.setTipoTraducido(mensaje); // necesitas agregar tipoTraducido en el modelo
+        }
+    }
+
+}
+C:\Users\H´p\Desktop\caba 2\apirest\revision_usabilidad\src\main\java\com\proyecto\cabapro\controller\TorneoController.java
+package com.proyecto.cabapro.controller;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import com.proyecto.cabapro.controller.forms.PartidoForm;
+import com.proyecto.cabapro.controller.forms.TorneoForm;
+import com.proyecto.cabapro.enums.CategoriaTorneo;
+import com.proyecto.cabapro.enums.TipoTorneo;
+import com.proyecto.cabapro.model.Partido;
+import com.proyecto.cabapro.model.Torneo;
+import com.proyecto.cabapro.service.PartidoService;
+import com.proyecto.cabapro.service.TorneoService;
+
+import jakarta.validation.Valid;
+
+@Controller
+@RequestMapping("/torneos")
+public class TorneoController {
+    @Autowired
+    private MessageSource messageSource;
+
+
+    private final TorneoService torneoService;
+    PartidoService partidoService;
+
+    public TorneoController(TorneoService torneoService, PartidoService partidoService) {
+        this.torneoService = torneoService;
+        this.partidoService = partidoService;
+    }
+
+    // Mostrar lista de torneos
+    @GetMapping
+    public String listar(Model model) {
+        model.addAttribute("torneos", torneoService.listarTorneos());
+        return "torneos/lista";
+    }
+
+    // Formulario de creación
+    @GetMapping("/nuevo")
+    public String mostrarFormNuevo(Model model) {
+        model.addAttribute("torneoForm", new TorneoForm());
+        return "torneos/form";
+    }
+
+    // Guardar torneo nuevo
+    @PostMapping("/guardar")
+    public String guardar(@Valid @ModelAttribute("torneoForm") TorneoForm torneoForm,
+                          BindingResult result,
+                          Model model) {
+        if (result.hasErrors()) {
+            // Vuelve a pasar los enums al modelo
+            model.addAttribute("tiposTorneo", TipoTorneo.values());
+            model.addAttribute("categoriasTorneo", CategoriaTorneo.values());
+            return "torneos/form";
+        }
+
+        Torneo torneo = new Torneo();
+        torneo.setNombre(torneoForm.getNombre());
+        torneo.setTipoTorneo(torneoForm.getTipoTorneo());
+        torneo.setCategoria(torneoForm.getCategoria());
+        torneo.setFechaInicio(torneoForm.getFechaInicio());
+        torneo.setFechaFin(torneoForm.getFechaFin());
+
+        torneoService.guardarTorneo(torneo);
+        return "redirect:/torneos";
+    }
+
+    // Mostrar formulario de edición
+    @GetMapping("/editar/{id}")
+    public String mostrarFormEditar(@PathVariable("id") int id, Model model) {
+        Torneo torneo = torneoService.obtenerPorId(id);
+        if (torneo == null) {
+            return "redirect:/torneos";
+        }
+
+        TorneoForm torneoForm = new TorneoForm();
+        torneoForm.setIdTorneo(torneo.getIdTorneo());
+        torneoForm.setNombre(torneo.getNombre());
+        torneoForm.setTipoTorneo(torneo.getTipoTorneo());
+        torneoForm.setCategoria(torneo.getCategoria());
+        torneoForm.setFechaInicio(torneo.getFechaInicio());
+        torneoForm.setFechaFin(torneo.getFechaFin());
+
+        model.addAttribute("torneoForm", torneoForm);
+        return "torneos/form";
+    }
+
+    // Actualizar torneo existente
+    @PostMapping("/actualizar/{id}")
+    public String actualizar(@PathVariable("id") int id,
+                             @Valid @ModelAttribute("torneoForm") TorneoForm torneoForm,
+                             BindingResult result,
+                             Model model) {
+        if (result.hasErrors()) {
+            model.addAttribute("tiposTorneo", TipoTorneo.values());
+            model.addAttribute("categoriasTorneo", CategoriaTorneo.values());
+            return "torneos/form";
+        }
+
+        Torneo torneo = torneoService.obtenerPorId(id);
+        if (torneo == null) {
+            // Si el torneo no existe, redirigir a la lista de torneos
+            
+            return "redirect:/torneos";
+        }
+
+        torneo.setNombre(torneoForm.getNombre());
+        torneo.setTipoTorneo(torneoForm.getTipoTorneo());
+        torneo.setCategoria(torneoForm.getCategoria());
+        torneo.setFechaInicio(torneoForm.getFechaInicio());
+        torneo.setFechaFin(torneoForm.getFechaFin());
+
+        torneoService.guardarTorneo(torneo);
+        return "redirect:/torneos";
+    }
+
+    // Eliminar torneo
+    @GetMapping("/eliminar/{id}")
+    public String eliminar(@PathVariable("id") int id) {
+        torneoService.eliminarTorneo(id);
+        return "redirect:/torneos";
+    }
+
+  
+
