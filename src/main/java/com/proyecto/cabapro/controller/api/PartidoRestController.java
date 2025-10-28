@@ -1,4 +1,4 @@
-package com.proyecto.cabapro.controller;
+package com.proyecto.cabapro.controller.api;
 
 import java.util.List;
 
