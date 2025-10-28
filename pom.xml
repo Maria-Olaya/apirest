@@ -106,6 +106,18 @@
 		</dependency>
 
 
+
+		<!-- OpenAPI -->
+
+
+		<!--	nueva para api-->
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+		</dependency>
+
+
+
 	</dependencies>
 
 	<build>
@@ -116,5 +128,8 @@
 			</plugin>
 		</plugins>
 	</build>
+
+
+
 
 </project>
