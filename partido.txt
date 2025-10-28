@@ -1,0 +1,649 @@
+C:\Users\H´p\Desktop\caba 2\apirest\revision_usabilidad\src\main\java\com\proyecto\cabapro\controller\forms\PartidoForm.java
+
+
+package com.proyecto.cabapro.controller.forms;
+
+import java.time.LocalDateTime;
+
+import org.springframework.format.annotation.DateTimeFormat;
+
+import com.proyecto.cabapro.enums.EstadoPartido;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+
+
+public class PartidoForm {
+
+    private Integer idPartido;
+
+    @NotNull(message = "{partido.fecha.obligatoria}")
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    private LocalDateTime fecha;
+
+    @NotBlank(message = "{partido.lugar.obligatorio}")
+    @Size(min = 3, max = 100, message = "{partido.lugar.tamano}")
+    @Pattern(regexp = "^[A-Za-zÁÉÍÓÚáéíóúÑñ0-9\\s]+$", message = "{partido.lugar.pattern}")
+    private String lugar;
+
+    private EstadoPartido estadoPartido;
+
+    @NotBlank(message = "{partido.equipoLocal.obligatorio}")
+    @Size(min = 3, max = 50, message = "{partido.equipoLocal.tamano}")
+    @Pattern(regexp = "^[A-Za-zÁÉÍÓÚáéíóúÑñ0-9\\s]+$", message = "{partido.equipoLocal.pattern}")
+    private String equipoLocal;
+
+    @NotBlank(message = "{partido.equipoVisitante.obligatorio}")
+    @Size(min = 3, max = 50, message = "{partido.equipoVisitante.tamano}")
+    @Pattern(regexp = "^[A-Za-zÁÉÍÓÚáéíóúÑñ0-9\\s]+$", message = "{partido.equipoVisitante.pattern}")
+    private String equipoVisitante;
+
+    @NotNull(message = "{partido.torneo.obligatorio}")
+    private Integer torneoId;
+
+
+
+    // Getters y setters
+    public Integer getIdPartido() { return idPartido; }
+    public void setIdPartido(Integer idPartido) { this.idPartido = idPartido; }
+
+    public LocalDateTime getFecha() { return fecha; }
+    public void setFecha(LocalDateTime fecha) { this.fecha = fecha; }
+
+    public String getLugar() { return lugar; }
+    public void setLugar(String lugar) { this.lugar = lugar; }
+
+    public EstadoPartido getEstadoPartido() { return estadoPartido; }
+    public void setEstadoPartido(EstadoPartido estadoPartido) { this.estadoPartido = estadoPartido; }
+
+    public String getEquipoLocal() { return equipoLocal; }
+    public void setEquipoLocal(String equipoLocal) { this.equipoLocal = equipoLocal; }
+
+    public String getEquipoVisitante() { return equipoVisitante; }
+    public void setEquipoVisitante(String equipoVisitante) { this.equipoVisitante = equipoVisitante; }
+
+    public Integer getTorneoId() { return torneoId; }
+    public void setTorneoId(Integer torneoId) { this.torneoId = torneoId; }
+
+   
+}
+
+C:\Users\H´p\Desktop\caba 2\apirest\revision_usabilidad\src\main\java\com\proyecto\cabapro\controller\TorneoController.java
+
+
+package com.proyecto.cabapro.controller;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import com.proyecto.cabapro.controller.forms.PartidoForm;
+import com.proyecto.cabapro.controller.forms.TorneoForm;
+import com.proyecto.cabapro.enums.CategoriaTorneo;
+import com.proyecto.cabapro.enums.TipoTorneo;
+import com.proyecto.cabapro.model.Partido;
+import com.proyecto.cabapro.model.Torneo;
+import com.proyecto.cabapro.service.PartidoService;
+import com.proyecto.cabapro.service.TorneoService;
+
+import jakarta.validation.Valid;
+
+@Controller
+@RequestMapping("/torneos")
+public class TorneoController {
+    @Autowired
+    private MessageSource messageSource;
+
+
+    private final TorneoService torneoService;
+    PartidoService partidoService;
+
+    public TorneoController(TorneoService torneoService, PartidoService partidoService) {
+        this.torneoService = torneoService;
+        this.partidoService = partidoService;
+    }
+
+  
+
+
+
+    // -------------------------------------------------- Partido dentro de Torneo ------------------------------------------------- /
+  
+  
+    // Ver detalle de torneo + partidos
+    @GetMapping("/{id}")
+    public String verDetalle(@PathVariable("id") int id, Model model) {
+        Torneo torneo = torneoService.obtenerPorId(id);
+        if (torneo == null) {
+            return "redirect:/torneos";
+        }
+
+        // Aquí cargas los partidos asociados al torneo
+        List<Partido> partidos = partidoService.obtenerPorTorneo(torneo);
+        model.addAttribute("partidos", partidos);
+
+
+        model.addAttribute("torneo", torneo);
+        
+        return "torneos/detalle"; // vista donde muestras torneo + partidos
+    }
+
+
+    @GetMapping("/{torneoId}/partidos/nuevo")
+    public String mostrarFormNuevoPartido(@PathVariable int torneoId, Model model) {
+        PartidoForm partidoForm = new PartidoForm();
+        partidoForm.setTorneoId(torneoId); // asigna el torneo
+        model.addAttribute("partidoForm", partidoForm);
+        return "partidos/form";
+    }
+
+    @PostMapping("/{torneoId}/partidos/guardar")
+    public String guardarPartido(@PathVariable int torneoId,
+                                @Valid @ModelAttribute("partidoForm") PartidoForm partidoForm,
+                                BindingResult result,
+                                Model model) {
+        if (result.hasErrors()) {
+            return "partidos/form";
+        }
+        Torneo torneo = torneoService.obtenerPorId(torneoId);
+        if (torneo == null) return "redirect:/torneos";
+    
+            try {
+                partidoService.crearPartido(partidoForm, torneo);
+                return "redirect:/torneos/" + torneoId;
+            } catch (IllegalArgumentException ex) {
+                String mensaje = messageSource.getMessage(ex.getMessage(), null, ex.getMessage(), LocaleContextHolder.getLocale());
+                model.addAttribute("errorMessage", mensaje);
+
+                return "partidos/form";
+            }
+
+        
+    }
+   
+
+    @GetMapping("/{torneoId}/partidos/editar/{partidoId}")
+    public String mostrarFormEditarPartido(@PathVariable int torneoId,
+                                        @PathVariable int partidoId,
+                                        Model model) {
+        Partido partido = partidoService.getPartidoById(partidoId).orElse(null);
+        if (partido == null || partido.getTorneo().getIdTorneo() != torneoId) {
+            return "redirect:/torneos/" + torneoId;
+        }
+
+        PartidoForm partidoForm = new PartidoForm();
+        partidoForm.setIdPartido(partido.getIdPartido());
+        partidoForm.setFecha(partido.getFecha());
+        partidoForm.setLugar(partido.getLugar());
+        partidoForm.setEstadoPartido(partido.getEstadoPartido());
+        partidoForm.setEquipoLocal(partido.getEquipoLocal());
+        partidoForm.setEquipoVisitante(partido.getEquipoVisitante());
+        partidoForm.setTorneoId(torneoId);
+
+        model.addAttribute("partidoForm", partidoForm);
+        return "partidos/form";
+    }
+
+
+    @PostMapping("/{torneoId}/partidos/{partidoId}/actualizar")
+    public String actualizarPartido(@PathVariable int torneoId,
+                                    @PathVariable int partidoId,
+                                    @Valid @ModelAttribute("partidoForm") PartidoForm partidoForm,
+                                    BindingResult result,
+                                    Model model) {
+
+        if (result.hasErrors()) {
+            return "partidos/form";
+        }
+
+        Partido partido = partidoService.getPartidoById(partidoId).orElse(null);
+        if (partido == null || partido.getTorneo().getIdTorneo() != torneoId) {
+            return "redirect:/torneos/" + torneoId;
+        }
+
+        try {
+            partidoService.actualizarPartido(partido, partidoForm);
+            return "redirect:/torneos/" + torneoId;
+        } catch (IllegalArgumentException ex) {
+            String mensaje = messageSource.getMessage(ex.getMessage(), null, ex.getMessage(), LocaleContextHolder.getLocale());
+            model.addAttribute("errorMessage", mensaje);
+
+            return "partidos/form";
+        }
+
+    }
+
+    @GetMapping("/{torneoId}/partidos/eliminar/{partidoId}")
+    public String eliminarPartido(@PathVariable int torneoId,
+                                @PathVariable int partidoId) {
+        partidoService.deletePartido(partidoId);
+        return "redirect:/torneos/" + torneoId;
+    }
+
+
+}
+
+
+
+C:\Users\H´p\Desktop\caba 2\apirest\revision_usabilidad\src\main\java\com\proyecto\cabapro\enums\EstadoPartido.java
+package com.proyecto.cabapro.enums;
+
+public enum EstadoPartido {
+    PROGRAMADO,
+    EN_CURSO,
+    FINALIZADO,
+    CANCELADO;
+
+    public String getMensajeKey() {
+        return "partido.estado." + this.name().toLowerCase();
+    }
+}
+
+C:\Users\H´p\Desktop\caba 2\apirest\revision_usabilidad\src\main\java\com\proyecto\cabapro\model
+C:\Users\H´p\Desktop\caba 2\apirest\revision_usabilidad\src\main\java\com\proyecto\cabapro\model\Partido.java
+package com.proyecto.cabapro.model;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.proyecto.cabapro.enums.EstadoPartido;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+
+@Entity
+@Table(name = "partidos")
+public class Partido {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int idPartido;
+
+    private LocalDateTime fecha;
+    private String lugar;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "estado_partido")
+    private EstadoPartido estadoPartido = EstadoPartido.PROGRAMADO; // valor por defecto
+
+    private String equipoLocal;
+    private String equipoVisitante;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="torneo_id")
+    private Torneo torneo;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "partido_arbitro",
+        joinColumns = @JoinColumn(name = "partido_id"),
+        inverseJoinColumns = @JoinColumn(name = "arbitro_id")
+    )
+    private List<Arbitro> arbitros = new ArrayList<>();
+    
+    @Transient
+    private String estadoTraducido;
+
+    public String getEstadoTraducido() { return estadoTraducido; }
+    public void setEstadoTraducido(String estadoTraducido) { this.estadoTraducido = estadoTraducido; }
+
+
+
+    // Getters y Setters
+    public int getIdPartido() {
+        return idPartido;
+    }
+
+    public void setIdPartido(int idPartido) {
+        this.idPartido = idPartido;
+    }
+
+    public LocalDateTime getFecha() {
+        return fecha;
+    }
+
+    public void setFecha(LocalDateTime fecha) {
+        this.fecha = fecha;
+    }
+
+    public String getLugar() {
+        return lugar;
+    }
+
+    public void setLugar(String lugar) {
+        this.lugar = lugar;
+    }
+
+
+
+    public EstadoPartido getEstadoPartido() {
+    return estadoPartido;
+    }
+
+    public void setEstadoPartido(EstadoPartido estadoPartido) {
+        this.estadoPartido = estadoPartido;
+    }
+
+    public String getEquipoLocal() {
+        return equipoLocal;
+    }
+
+    public void setEquipoLocal(String equipoLocal) {
+        this.equipoLocal = equipoLocal;
+    }
+
+    public String getEquipoVisitante() {
+        return equipoVisitante;
+    }
+
+    public void setEquipoVisitante(String equipoVisitante) {
+        this.equipoVisitante = equipoVisitante;
+    }
+
+    public Torneo getTorneo() {
+        return torneo;
+    }
+
+    public void setTorneo(Torneo torneo) {
+        this.torneo = torneo;
+    }
+
+    public List<Arbitro> getArbitros() {
+        return arbitros;
+    }
+
+    public void setArbitros(List<Arbitro> arbitros) {
+        this.arbitros = arbitros;
+    }
+}
+
+C:\Users\H´p\Desktop\caba 2\apirest\revision_usabilidad\src\main\java\com\proyecto\cabapro\repository\PartidoRepository.java
+package com.proyecto.cabapro.repository;
+
+import java.util.List;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+
+import com.proyecto.cabapro.enums.EstadoPartido;
+import com.proyecto.cabapro.model.Partido;
+
+@Repository
+public interface PartidoRepository extends JpaRepository<Partido, Integer> {
+
+    List<Partido> findByTorneo_IdTorneo(int torneoId);
+
+    // CORREGIDO: coincide con el nombre del campo del ID en Arbitro/Usuario
+    List<Partido> findByArbitros_Id(int idArbitro);
+
+    // ahora con enum
+    List<Partido> findByEstadoPartido(EstadoPartido estado);
+
+    // torneos + estado (enum)
+    List<Partido> findByTorneo_IdTorneoAndEstadoPartido(int torneoId, EstadoPartido estado);
+
+ 
+
+    List<Partido> findByEquipoLocal(String equipoLocal);
+
+    List<Partido> findByEquipoVisitante(String equipoVisitante);
+       // opcional: traer partidos de un torneo con árbitros (evita N+1)
+   
+    @Query("SELECT DISTINCT p FROM Partido p " +
+           "JOIN FETCH p.torneo t " +
+           "LEFT JOIN FETCH p.arbitros a " +
+           "WHERE t.idTorneo = :torneoId")
+    List<Partido> findByTorneoWithArbitros(@Param("torneoId") int torneoId);
+
+}
+
+
+C:\Users\H´p\Desktop\caba 2\apirest\revision_usabilidad\src\main\java\com\proyecto\cabapro\scheduler
+package com.proyecto.cabapro.scheduler;
+
+import java.util.List;
+
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.proyecto.cabapro.model.Partido;
+import com.proyecto.cabapro.service.PartidoService;
+
+@Component
+public class PartidoScheduler {
+
+    private final PartidoService partidoService;
+
+    public PartidoScheduler(PartidoService partidoService) {
+        this.partidoService = partidoService;
+    }
+
+    /**
+     * Corre cada minuto y actualiza el estado de todos los partidos.
+     * Cron: sec min hora día mes díaSemana
+     */
+    @Transactional
+    @Scheduled(cron = "0 * * * * *") // cada minuto
+    public void actualizarEstadosPartidos() {
+        List<Partido> partidos = partidoService.getAllPartidos();
+        for (Partido partido : partidos) {
+            partidoService.actualizarEstado(partido); // actualizar estado
+            partidoService.savePartido(partido); // persistir cambio
+        }
+        System.out.println("Scheduler ejecutado: estados de partidos actualizados.");
+    }
+}
+
+C:\Users\H´p\Desktop\caba 2\apirest\revision_usabilidad\src\main\java\com\proyecto\cabapro\service\PartidoService.java
+package com.proyecto.cabapro.service;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.stereotype.Service;
+
+import com.proyecto.cabapro.controller.forms.PartidoForm;
+import com.proyecto.cabapro.enums.EstadoPartido;
+import com.proyecto.cabapro.model.Partido;
+import com.proyecto.cabapro.model.Torneo;
+import com.proyecto.cabapro.repository.PartidoRepository;
+
+@Service
+public class PartidoService {
+
+    @Autowired
+    private PartidoRepository partidoRepository;
+    @Autowired
+    private MessageSource messageSource;
+
+    private String estadoTraducido;
+
+    public String getEstadoTraducido() {
+        return estadoTraducido;
+    }
+
+    public void setEstadoTraducido(String estadoTraducido) {
+        this.estadoTraducido = estadoTraducido;
+    }
+
+    public List<Partido> getAllPartidos() {
+        return partidoRepository.findAll();
+    }
+
+    public Optional<Partido> getPartidoById(int id) {
+        return partidoRepository.findById(id);
+    }
+
+
+
+
+    // Reemplaza este método con validación
+    public Partido savePartido(Partido partido) {
+        var torneo = partido.getTorneo();
+        if (torneo == null) {
+            throw new IllegalArgumentException(
+            messageSource.getMessage("partido.error.sin_torneo", null, LocaleContextHolder.getLocale())
+        );
+        }
+
+        if (torneo.getFechaInicio() != null && partido.getFecha().isBefore(torneo.getFechaInicio())) {
+            throw new IllegalArgumentException(
+            messageSource.getMessage("partido.error.fecha_antes_inicio", null, LocaleContextHolder.getLocale())
+        );
+        }
+        if (torneo.getFechaFin() != null && partido.getFecha().isAfter(torneo.getFechaFin())) {
+            throw new IllegalArgumentException(
+            messageSource.getMessage("partido.error.fecha_despues_fin", null, LocaleContextHolder.getLocale())
+        );        }
+
+        return partidoRepository.save(partido);
+    }
+
+    public Partido crearPartido(PartidoForm form, Torneo torneo) {
+        Partido partido = new Partido();
+        partido.setFecha(form.getFecha());
+        partido.setLugar(form.getLugar());
+        partido.setEquipoLocal(form.getEquipoLocal());
+        partido.setEquipoVisitante(form.getEquipoVisitante());
+        partido.setEstadoPartido(EstadoPartido.PROGRAMADO);
+        partido.setTorneo(torneo);
+        return savePartido(partido); // ya valida fechas
+    }
+
+    public Partido actualizarPartido(Partido partido, PartidoForm form) {
+        partido.setFecha(form.getFecha());
+        partido.setLugar(form.getLugar());
+        partido.setEquipoLocal(form.getEquipoLocal());
+        partido.setEquipoVisitante(form.getEquipoVisitante());
+        partido.setEstadoPartido(form.getEstadoPartido());
+        return savePartido(partido);
+    }
+
+
+
+    public void deletePartido(int id) {
+        partidoRepository.deleteById(id);
+    }
+
+    public List<Partido> getPartidosByTorneo(int torneoId) {
+        return partidoRepository.findByTorneo_IdTorneo(torneoId);
+    }
+    public List<Partido> obtenerPorTorneo(Torneo torneo) {
+        List<Partido> partidos = partidoRepository.findByTorneo_IdTorneo(torneo.getIdTorneo());
+
+        partidos.forEach(p -> {
+            actualizarEstado(p);        // mantiene tu lógica actual
+            traducirEstado(p);          // ahora separado
+        });
+
+        return partidos;
+    }
+
+    private void traducirEstado(Partido partido) {
+        if (partido.getEstadoPartido() != null) {
+            String mensaje = messageSource.getMessage(
+                partido.getEstadoPartido().getMensajeKey(),
+                null,
+                LocaleContextHolder.getLocale()
+            );
+            partido.setEstadoTraducido(mensaje);
+        }
+    }
+
+
+
+
+    public List<Partido> getPartidosByArbitro(int arbitroId) {
+    return partidoRepository.findByArbitros_Id(arbitroId);
+    }
+
+
+    public List<Partido> getPartidosByEstado(EstadoPartido estado) {
+        List<Partido> partidos = partidoRepository.findByEstadoPartido(estado);
+        partidos.forEach(this::actualizarEstado);
+        return partidos;
+    }
+
+    public List<Partido> getPartidosByTorneoAndEstado(int torneoId, EstadoPartido estado) {
+        List<Partido> partidos = partidoRepository.findByTorneo_IdTorneoAndEstadoPartido(torneoId, estado);
+        partidos.forEach(this::actualizarEstado);
+        return partidos;
+    }
+
+    public List<Partido> getPartidosByEquipoLocal(String equipoLocal) {
+        return partidoRepository.findByEquipoLocal(equipoLocal);
+    }
+
+    public List<Partido> getPartidosByEquipoVisitante(String equipoVisitante) {
+        return partidoRepository.findByEquipoVisitante(equipoVisitante);
+    }
+
+    public EstadoPartido calcularEstado(Partido partido) {
+            actualizarEstado(partido); 
+        return partido.getEstadoPartido();
+    }
+
+    
+    // ---------------- Lógica de estado ----------------
+    /**
+     * Actualiza el estado del partido según la fecha actual.
+     * - Si fecha == null -> no hace nada.
+     * - Si ya CANCELADO -> no cambia.
+     * - Usa duración por defecto de 120 minutos (ajusta para pruebas).
+     */
+  
+
+    // ---- Nuevo método ----
+    public void actualizarEstado(Partido partido) {
+        if (partido.getFecha() == null) return;
+        if (partido.getEstadoPartido() == EstadoPartido.CANCELADO) return;
+
+        LocalDateTime ahora = LocalDateTime.now();
+        long duracionMinutos = 20L; //  parametrizar
+
+        LocalDateTime inicio = partido.getFecha();
+        LocalDateTime fin = inicio.plusMinutes(duracionMinutos);
+
+        if (ahora.isBefore(inicio)) {
+            partido.setEstadoPartido(EstadoPartido.PROGRAMADO);
+        } else if (!ahora.isBefore(inicio) && ahora.isBefore(fin)) {
+            partido.setEstadoPartido(EstadoPartido.EN_CURSO);
+        } else {
+            partido.setEstadoPartido(EstadoPartido.FINALIZADO);
+        }
+    }
+
+
+
+}

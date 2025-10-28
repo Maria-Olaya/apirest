@@ -1,0 +1,290 @@
+C:\Users\H´p\Desktop\caba 2\apirest\revision_usabilidad\src\main\java\com\proyecto\cabapro\config\SecurityConfig.java
+package com.proyecto.cabapro.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+
+@Configuration
+public class SecurityConfig {
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+            .csrf(csrf -> csrf.disable())
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/", "/login", "/registro", "/css/**", "/js/**","/images/**").permitAll()
+                .requestMatchers("/admin/**","/torneos/**","/partidos/**").hasRole("ADMIN")
+                .requestMatchers("/arbitro/**").hasRole("ARBITRO")
+                .anyRequest().authenticated()
+            )
+            .formLogin(form -> form
+                .loginPage("/login")
+                .successHandler((request, response, authentication) -> {
+                    // Tomamos el rol del usuario autenticado
+                    String role = authentication.getAuthorities().iterator().next().getAuthority();
+                    if (role.equals("ROLE_ADMIN")) {
+                        response.sendRedirect("/admin/dashboard");
+                    } else if (role.equals("ROLE_ARBITRO")) {
+                        response.sendRedirect("/arbitro/dashboard");
+                    } else {
+                        response.sendRedirect("/"); // fallback
+                    }
+                })
+                .permitAll()
+            )
+
+            .logout(logout -> logout
+                .logoutSuccessUrl("/")
+                .permitAll()
+            );
+
+        return http.build();
+    }
+}
+
+
+/*[Petición HTTP]
+       |
+       v
+[SecurityFilterChain]
+       |
+       +--> CSRF? disabled -> sigue
+       |
+       +--> URL autorizada? 
+       |      |-- /, /login, /registro, /css/** -> pasa
+       |      |-- /admin/** -> check ROLE_ADMIN
+       |      |-- /arbitro/** -> check ROLE_ARBITRO
+       |      |-- cualquier otra -> check autenticado
+       |
+       +--> Login Form?
+       |      |-- credenciales correctas -> successHandler -> redirige según rol
+       |
+       +--> Logout?
+              |-- invalida sesión -> redirige a /
+*/
+C:\Users\H´p\Desktop\caba 2\apirest\revision_usabilidad\src\main\java\com\proyecto\cabapro\controller\AuthController.java
+package com.proyecto.cabapro.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+
+import com.proyecto.cabapro.controller.forms.RegisterForm;
+import com.proyecto.cabapro.model.Administrador;
+import com.proyecto.cabapro.repository.UsuarioRepository;
+import com.proyecto.cabapro.service.CustomUserDetailsService;
+
+import jakarta.validation.Valid;
+
+@Controller
+public class AuthController {
+    @Autowired
+    private MessageSource messageSource;
+
+
+    private final UsuarioRepository usuarioRepository;
+    private final BCryptPasswordEncoder passwordEncoder;
+    private final CustomUserDetailsService customUserDetailsService;
+
+    public AuthController(UsuarioRepository usuarioRepository , CustomUserDetailsService customUserDetailsService) {
+        this.usuarioRepository = usuarioRepository;
+        this.passwordEncoder = new BCryptPasswordEncoder();
+        this.customUserDetailsService = customUserDetailsService;
+    }
+
+    @GetMapping("/login")
+    public String login() {
+        return "login";
+    }
+
+    @GetMapping("/registro")
+    public String mostrarFormulario(Model model) {
+        model.addAttribute("registerForm", new RegisterForm());
+        return "registro";
+    }
+
+    @PostMapping("/registro")
+    public String registrarUsuario(@Valid @ModelAttribute("registerForm") RegisterForm form,
+                                BindingResult result, Model model) {
+        
+        
+        // Validar coincidencia de contraseñas
+        if(!form.getContrasena().equals(form.getConfirmContrasena())) {
+            result.rejectValue("confirmContrasena", "error.registerForm",
+                messageSource.getMessage("registro.error.contrasena_no_coincide", null, LocaleContextHolder.getLocale()));
+        }
+        
+
+        if(customUserDetailsService.correoExiste(form.getCorreo())) {
+            result.rejectValue("correo", "error.registerForm",
+                messageSource.getMessage("registro.error.correo_duplicado", null, LocaleContextHolder.getLocale()));
+        }
+
+        if (result.hasErrors()) {
+            return "registro";
+        }
+
+
+
+        Administrador admin = new Administrador(
+                form.getNombre(),
+                form.getApellido(),
+                form.getCorreo(),
+                passwordEncoder.encode(form.getContrasena()),
+                "ROLE_ADMIN"
+        );
+
+        usuarioRepository.save(admin);
+
+        model.addAttribute("mensajeExito",
+            messageSource.getMessage("registro.exito", null, LocaleContextHolder.getLocale()));
+        return "login";
+    }
+
+}
+
+C:\Users\H´p\Desktop\caba 2\apirest\revision_usabilidad\src\main\java\com\proyecto\cabapro\model\Usuario.java
+
+package com.proyecto.cabapro.model;
+
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = "usuarios")
+@Inheritance(strategy = InheritanceType.JOINED)
+public class Usuario {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
+
+    private String nombre;
+    private String apellido;
+    private String correo;
+    private String contrasena;
+    private String rol;
+
+    // Constructor vacío
+    public Usuario() {}
+
+    // Constructor con parámetros
+    public Usuario(String nombre, String apellido, String correo, String contrasena, String rol) {
+        this.nombre = nombre;
+        this.apellido = apellido;
+        this.correo = correo;
+        this.contrasena = contrasena;
+        this.rol = rol;
+    }
+
+    // Getters y setters
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
+
+    public String getNombre() { return nombre; }
+    public void setNombre(String nombre) { this.nombre = nombre; }
+
+    public String getApellido() { return apellido; }
+    public void setApellido(String apellido) { this.apellido = apellido; }
+
+    public String getCorreo() { return correo; }
+    public void setCorreo(String correo) { this.correo = correo; }
+
+    public String getContrasena() { return contrasena; }
+    public void setContrasena(String contrasena) { this.contrasena = contrasena; }
+
+    public String getRol() { return rol; }
+    public void setRol(String rol) { this.rol = rol; }
+
+}
+
+C:\Users\H´p\Desktop\caba 2\apirest\revision_usabilidad\src\main\java\com\proyecto\cabapro\repository\UsuarioRepository.java
+package com.proyecto.cabapro.repository;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import com.proyecto.cabapro.model.Usuario;
+
+@Repository
+public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
+    
+    // Para login / seguridad
+    Optional<Usuario> findByCorreo(String correo);
+
+    // Buscar por nombre exacto
+    List<Usuario> findByNombre(String nombre);
+
+    // Buscar por apellido exacto
+    List<Usuario> findByApellido(String apellido);
+
+   
+}
+
+C:\Users\H´p\Desktop\caba 2\apirest\revision_usabilidad\src\main\java\com\proyecto\cabapro\service\CustomUserDetailsService.java
+package com.proyecto.cabapro.service;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
+
+import com.proyecto.cabapro.model.Usuario;
+import com.proyecto.cabapro.repository.UsuarioRepository;
+
+@Service
+public class CustomUserDetailsService implements UserDetailsService {
+
+    @Autowired
+    private UsuarioRepository usuarioRepository;
+    @Autowired
+    private MessageSource messageSource;
+
+
+    @Override
+    public UserDetails loadUserByUsername(String correo) throws UsernameNotFoundException {
+        Usuario usuario = usuarioRepository.findByCorreo(correo)
+                .orElseThrow(() -> new UsernameNotFoundException(
+                    messageSource.getMessage("auth.error.usuario_no_encontrado", null, LocaleContextHolder.getLocale())
+                ));
+
+        return User.builder()
+                .username(usuario.getCorreo())
+                .password(usuario.getContrasena())
+                .roles(usuario.getRol().replace("ROLE_", "")) // quitar prefijo
+                .build();
+    }
+        // Aquí el método de validación de correo
+    public boolean correoExiste(String correo) {
+        return usuarioRepository.findByCorreo(correo).isPresent();
+    }
+}
